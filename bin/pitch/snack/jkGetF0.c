@@ -1366,7 +1366,7 @@ int rapt(float *input, float *output, int length, double sample_freq, int frame_
   static int framestep = -1;
   long sdstep = 0, total_samps;
   int ndone = 0;
-  float *tmp, *unvoiced, *padded_input;
+  float *tmp, *unvoiced, *acpeak, *rmse, *padded_input;
   int count = 0;
   int startpos = 0, endpos = -1;
   long max;
@@ -1399,6 +1399,8 @@ int rapt(float *input, float *output, int length, double sample_freq, int frame_
   par = (F0_params *) malloc(sizeof(F0_params));
   tmp = (float *) malloc(sizeof(float) * padded_length);
   unvoiced = (float *) malloc(sizeof(float) * padded_length);
+  rmse = (float *) malloc(sizeof(float) * padded_length);
+  acpeak = (float *) malloc(sizeof(float) * padded_length);
 
   for (i = 0; i < padded_length; i++) {
       tmp[i] = 0.0;
@@ -1471,6 +1473,8 @@ int rapt(float *input, float *output, int length, double sample_freq, int frame_
         for (i = vecsize - 1; i >= 0; i--) {
             tmp[count] = f0p[i];
             unvoiced[count] = vuvp[i];
+            rmse[count] = rms_speech[i];
+            acpeak[count] = acpkp[i];
             count++;
         }
 
@@ -1498,6 +1502,12 @@ int rapt(float *input, float *output, int length, double sample_freq, int frame_
               output[i] = -1.0E10;
           }
           break;
+      case 5:                  /* f0, unvoiced, rmse, acpeak */
+          output[i*4] = tmp[i];
+          output[i*4 + 1] = unvoiced[i];
+          output[i*4 + 2] = rmse[i];
+          output[i*4 + 3] = acpeak[i];
+          break;
       default:                  /* pitch */
           if (tmp[i] != 0.0) {
               output[i] = sample_freq / tmp[i];
@@ -1513,6 +1523,8 @@ int rapt(float *input, float *output, int length, double sample_freq, int frame_
   free((void *) par);
   free((void *) tmp);
   free((void *) unvoiced);
+  free((void *) rmse);
+  free((void *) acpeak);
 
 
   free_dp_f0();
