@@ -85,7 +85,7 @@
 
 char *BOOL[] = { "FALSE", "TRUE" };
 
-void excite(double* pitch, int n, double* out, int fprd, int iprd, Boolean gauss, int seed)
+void excite(double* pitch, int n, double* out, int fprd, int iprd, Boolean noise, Boolean gauss, int seed)
 {
    int i, j, k = 0;
    int fn;
@@ -110,7 +110,7 @@ void excite(double* pitch, int n, double* out, int fprd, int iprd, Boolean gauss
       }
 
       for (j = fprd, i = (iprd + 1) / 2; j--;) {
-         if (p1 == 0.0) {
+         if ((p1 == 0.0) && noise) {
             if (gauss)
                x = (double) nrandom(&next);
             else
